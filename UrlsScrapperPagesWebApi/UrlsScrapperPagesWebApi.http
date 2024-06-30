@@ -1,0 +1,6 @@
+@UrlsScrapperPagesWebApi_HostAddress = http://localhost:5162
+
+GET {{UrlsScrapperPagesWebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
