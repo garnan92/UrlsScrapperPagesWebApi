@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Reflection.PortableExecutable;
 
 namespace UrlsScrapperPagesWebApi.Controllers
 {
@@ -11,23 +13,31 @@ namespace UrlsScrapperPagesWebApi.Controllers
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
-        private readonly ILogger<WeatherForecastController> _logger;
+        class Page
+        {
+            public Guid id { get; set; }
+            public string name { get; set; }
+            public string url { get; set; }
+            public string element_name { get; set; }
+            public byte[] elements { get; set; }
+        }
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ApplicationDbContext _dbcontext;
+
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, ApplicationDbContext dbcontext)
         {
             _logger = logger;
+            _dbcontext = dbcontext;
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        public async Task<ActionResult<object>> GetAsync()
         {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+
+            var result = await _dbcontext.ExecuteStoredProcedureAsync<Page>("dbo.PagesList");
+
+            return Ok(result);
         }
     }
 }
